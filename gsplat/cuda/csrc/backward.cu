@@ -830,7 +830,7 @@ __global__ void rasterize_backward_sum_kernel(
 
                 const float v_sigma = -opac * vis * v_alpha;
                 v_conic_local = {0.5f * v_sigma * delta.x * delta.x, 
-                                        0.5f * v_sigma * delta.x * delta.y, 
+                                        v_sigma * delta.x * delta.y, 
                                         0.5f * v_sigma * delta.y * delta.y};
                 v_xy_local = {v_sigma * (conic.x * delta.x + conic.y * delta.y), 
                                     v_sigma * (conic.y * delta.x + conic.z * delta.y)};
