@@ -51,7 +51,8 @@ def map_gaussian_to_intersects(
 
 
 def get_tile_bin_edges(
-    num_intersects: int, isect_ids_sorted: Int[Tensor, "num_intersects 1"]
+    num_intersects: int, isect_ids_sorted: Int[Tensor, "num_intersects 1"],
+    num_tiles: int = 0,
 ) -> Int[Tensor, "num_intersects 2"]:
     """Map sorted intersection IDs to tile bins which give the range of unique gaussian IDs belonging to each tile.
 
@@ -65,13 +66,14 @@ def get_tile_bin_edges(
     Args:
         num_intersects (int): total number of gaussian intersects.
         isect_ids_sorted (Tensor): sorted unique IDs for each gaussian in the form (tile | depth id).
+        num_tiles (int): total number of tiles. Used to ensure the output is large enough.
 
     Returns:
         A Tensor:
 
         - **tile_bins** (Tensor): range of gaussians IDs hit per tile.
     """
-    return _C.get_tile_bin_edges(num_intersects, isect_ids_sorted.contiguous())
+    return _C.get_tile_bin_edges(num_intersects, isect_ids_sorted.contiguous(), num_tiles)
 
 
 def compute_cov2d_bounds(
@@ -163,5 +165,6 @@ def bin_and_sort_gaussians(
     )
     isect_ids_sorted, sorted_indices = torch.sort(isect_ids)
     gaussian_ids_sorted = torch.gather(gaussian_ids, 0, sorted_indices)
-    tile_bins = get_tile_bin_edges(num_intersects, isect_ids_sorted)
+    num_tiles = tile_bounds[0] * tile_bounds[1]
+    tile_bins = get_tile_bin_edges(num_intersects, isect_ids_sorted, num_tiles)
     return isect_ids, gaussian_ids, isect_ids_sorted, gaussian_ids_sorted, tile_bins
